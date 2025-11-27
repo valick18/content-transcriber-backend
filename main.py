@@ -96,29 +96,6 @@ async def chat_endpoint(request: ChatRequest):
     answer = services.ask_question(job["transcript"], request.question)
     return {"answer": answer}
 
-# Serve Static Files (Frontend)
-from fastapi.staticfiles import StaticFiles
-import os
-
-# Create static dir if not exists
-if not os.path.exists("static"):
-    os.makedirs("static")
-
-app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
-
-@app.get("/{full_path:path}")
-async def serve_frontend(full_path: str):
-    # API requests are already handled above.
-    # Everything else serves index.html for React Router
-    if full_path.startswith("api"):
-        raise HTTPException(status_code=404, detail="Not Found")
-    
-    if os.path.exists(f"static/{full_path}") and os.path.isfile(f"static/{full_path}"):
-        from fastapi.responses import FileResponse
-        return FileResponse(f"static/{full_path}")
-        
-    return FileResponse("static/index.html")
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
